@@ -1,0 +1,224 @@
+/* Global Styles */
+:root {
+    --primary-color: #4e73df;
+    --secondary-color: #858796;
+    --success-color: #1cc88a;
+    --danger-color: #e74a3b;
+    --warning-color: #f6c23e;
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f8f9fc;
+}
+
+/* Navbar Styles */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    background: linear-gradient(to right, var(--primary-color), #224abe);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background: linear-gradient(to right, #f8f9fc, #ffffff);
+    border-bottom: 1px solid #e3e6f0;
+    padding: 1rem 1.25rem;
+}
+
+.card-title {
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+/* Health Stats Cards Styling */
+.stats-card {
+    transition: all 0.3s ease;
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stats-icon {
+    font-size: 2rem;
+    opacity: 0.8;
+}
+
+.temperature-icon {
+    color: #e74a3b;
+}
+
+.heart-rate-icon {
+    color: #4e73df;
+}
+
+.spo2-icon {
+    color: #1cc88a;
+}
+
+/* Data text styling */
+.temperature-data,
+.heart-rate-data,
+.spo2-data {
+    font-weight: 600;
+    font-size: 2rem;
+}
+
+/* Health Data Colors */
+.temperature-data { color: var(--danger-color); }
+.heart-rate-data { color: var(--primary-color); }
+.spo2-data { color: var(--success-color); }
+
+/* Recommendation Styles */
+.recommendation-high {
+    border-left: 4px solid var(--danger-color);
+    background-color: rgba(231, 74, 59, 0.05);
+}
+
+.recommendation-medium {
+    border-left: 4px solid var(--warning-color);
+    background-color: rgba(246, 194, 62, 0.05);
+}
+
+.recommendation-normal {
+    border-left: 4px solid var(--success-color);
+    background-color: rgba(28, 200, 138, 0.05);
+}
+
+/* Form Styles */
+.form-control {
+    border-radius: 10px;
+    border: 1px solid #d1d3e2;
+    padding: 0.8rem 1rem;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+.btn {
+    border-radius: 10px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: linear-gradient(to right, var(--primary-color), #224abe);
+    border: none;
+}
+
+/* Emergency Alert Styles */
+.status-indicator {
+    font-size: 1.2rem;
+}
+
+.status-indicator .fa-circle {
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.3));
+}
+
+.text-success {
+    color: #1cc88a !important;
+}
+
+.text-danger {
+    color: #e74a3b !important;
+}
+
+/* Card hover effects */
+.stats-card {
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 2rem rgba(0,0,0,0.15);
+}
+
+/* Emergency button styles */
+.btn-danger {
+    background: linear-gradient(to right, #e74a3b, #c23321);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0.5rem 1rem rgba(231, 74, 59, 0.2);
+}
+
+/* Alert status indicators */
+.alert-status {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 600;
+}
+
+.alert-active {
+    background-color: rgba(231, 74, 59, 0.1);
+    color: #e74a3b;
+}
+
+.alert-inactive {
+    background-color: rgba(28, 200, 138, 0.1);
+    color: #1cc88a;
+}
+
+/* Animation Effects */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+}
+
+.recommendations-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.recommendation-item {
+    transition: all 0.3s ease;
+}
+
+.recommendation-item:hover {
+    transform: translateX(5px);
+}
+
+.recommendation-item i {
+    font-size: 1.2em;
+}
+
+.opacity-75 {
+    opacity: 0.75;
+}

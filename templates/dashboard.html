@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Elderly Care System - Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<!-- Font Awesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<!-- jQuery and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        .card {
+            margin-bottom: 20px;
+        }
+        .recommendation-high {
+            color: #dc3545;
+        }
+        .recommendation-medium {
+            color: #ffc107;
+        }
+        .recommendation-normal {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-robot mr-2"></i>AI Elderly Care System
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('download_data') }}">
+                            <i class="fas fa-file-csv mr-1"></i> Download All Data (CSV)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-toggle="modal" data-target="#reportModal">
+                            <i class="fas fa-file-pdf mr-1"></i> Generate Report (PDF)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user mr-1"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Emergency Alert Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-danger">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title text-danger mb-0">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>Emergency Alert Status
+                            </h5>
+                        </div>
+                        <div>
+                            <button class="btn btn-danger btn-lg" onclick="triggerEmergencyAlert()">
+                                <i class="fas fa-bell mr-2"></i>Trigger Emergency Alert
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flex Sensor Status Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card animate-fade-in">
+                    <div class="card-body">
+                        <h6 class="text-uppercase mb-2">Flex Sensor 1 (Help)</h6>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="mb-0">{{ sensor_data.flex1 if sensor_data else '--' }}</h2>
+                            <div class="status-indicator" id="flex1Status">
+                                <i class="fas fa-circle {{ 'text-success' if sensor_data and sensor_data.flex1 < 1000 else 'text-danger' }}"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card animate-fade-in">
+                    <div class="card-body">
+                        <h6 class="text-uppercase mb-2">Flex Sensor 2 (Water)</h6>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="mb-0">{{ sensor_data.flex2 if sensor_data else '--' }}</h2>
+                            <div class="status-indicator" id="flex2Status">
+                                <i class="fas fa-circle {{ 'text-success' if sensor_data and sensor_data.flex2 < 1000 else 'text-danger' }}"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card animate-fade-in">
+                    <div class="card-body">
+                        <h6 class="text-uppercase mb-2">Flex Sensor 3 (Food)</h6>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="mb-0">{{ sensor_data.flex3 if sensor_data else '--' }}</h2>
+                            <div class="status-indicator" id="flex3Status">
+                                <i class="fas fa-circle {{ 'text-success' if sensor_data and sensor_data.flex3 < 1000 else 'text-danger' }}"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card animate-fade-in">
+                    <div class="card-body">
+                        <h6 class="text-uppercase mb-2">Flex Sensor 4 (Medicine)</h6>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="mb-0">{{ sensor_data.flex4 if sensor_data else '--' }}</h2>
+                            <div class="status-indicator" id="flex4Status">
+                                <i class="fas fa-circle {{ 'text-success' if sensor_data and sensor_data.flex4 < 1000 else 'text-danger' }}"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add JavaScript for emergency alert functionality -->
+        <script>
+            function triggerEmergencyAlert() {
+                if (confirm('Are you sure you want to trigger an emergency alert?')) {
+                    // You can add AJAX call here to trigger the alert
+                    alert('Emergency alert triggered! Notifying caregivers and emergency contacts.');
+                }
+            }
+
+            // Auto-refresh dashboard data every 30 seconds
+            setInterval(function() {
+                location.reload();
+            }, 30000);
+        </script>
+
+        <div class="row">
+            <!-- Health Stats Cards -->
+            <div class="col-md-4">
+                <div class="card stats-card animate-fade-in">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h6 class="text-uppercase mb-1">Temperature</h6>
+                                <h2 class="temperature-data mb-0">
+                                    {% if sensor_data and sensor_data.temperature %}
+                                        {{ "%.1f"|format(sensor_data.temperature) }}°C
+                                    {% else %}
+                                        --°C
+                                    {% endif %}
+                                </h2>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-thermometer-half stats-icon temperature-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card stats-card animate-fade-in">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h6 class="text-uppercase mb-1">Heart Rate</h6>
+                                <h2 class="heart-rate-data mb-0">
+                                    {% if sensor_data and sensor_data.heart_rate %}
+                                        {{ sensor_data.heart_rate }} BPM
+                                    {% else %}
+                                        -- BPM
+                                    {% endif %}
+                                </h2>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-heartbeat stats-icon heart-rate-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card stats-card animate-fade-in">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h6 class="text-uppercase mb-1">SpO2</h6>
+                                <h2 class="spo2-data mb-0">
+                                    {% if sensor_data and sensor_data.spo2 %}
+                                        {{ sensor_data.spo2 }}%
+                                    {% else %}
+                                        --%
+                                    {% endif %}
+                                </h2>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-lungs stats-icon spo2-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Health Data Chart -->
+            <div class="col-md-8">
+                <div class="card animate-fade-in">
+                    <div class="card-body">
+                        <h5 class="card-title">Health Data Trends</h5>
+                        <canvas id="healthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Recommendations -->
+            <div class="col-md-4">
+                <div class="card animate-fade-in">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-notes-medical mr-2"></i>Health Recommendations
+                        </h5>
+                        {% if recommendations %}
+                        <div class="recommendations-list">
+                            {% for rec in recommendations %}
+                            <div class="recommendation-item p-3 mb-3 rounded 
+                                        {% if rec.severity == 'high' %}bg-danger text-white{% 
+                                        elif rec.severity == 'medium' %}bg-warning{% 
+                                        else %}bg-info text-white{% endif %}">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas {% if rec.type == 'emergency' %}fa-exclamation-triangle{% 
+                                                else %}fa-heartbeat{% endif %} mr-2"></i>
+                                    <div>
+                                        {{ rec.message }}
+                                        {% if rec.timestamp %}
+                                        <small class="d-block opacity-75">{{ rec.timestamp }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted">No recommendations available</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportModalLabel">Generate Health Report</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="reportForm">
+                        <div class="form-group">
+                            <label for="startDate">Start Date</label>
+                            <input type="date" class="form-control" id="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">End Date</label>
+                            <input type="date" class="form-control" id="endDate" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="generateReport()">Generate Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Health data chart
+        var ctx = document.getElementById('healthChart').getContext('2d');
+        var healthChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [{% for row in health_data %}'{{ row[5] }}'{% if not loop.last %},{% endif %}{% endfor %}].reverse(),
+                datasets: [{
+                    label: 'Temperature (°C)',
+                    data: [{% for row in health_data %}{{ row[2] }}{% if not loop.last %},{% endif %}{% endfor %}].reverse(),
+                    borderColor: 'rgba(231, 74, 59, 1)',
+                    backgroundColor: 'rgba(231, 74, 59, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Heart Rate (bpm)',
+                    data: [{% for row in health_data %}{{ row[3] }}{% if not loop.last %},{% endif %}{% endfor %}].reverse(),
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'SpO2 (%)',
+                    data: [{% for row in health_data %}{{ row[4] }}{% if not loop.last %},{% endif %}{% endfor %}].reverse(),
+                    borderColor: 'rgba(28, 200, 138, 1)',
+                    backgroundColor: 'rgba(28, 200, 138, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        function generateReport() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+            
+            if (startDate > endDate) {
+                alert('Start date must be before end date');
+                return;
+            }
+            
+            window.location.href = `/download-report-pdf/${startDate}/${endDate}`;
+            $('#reportModal').modal('hide');
+        }
+
+        // Set default dates for the report (last 30 days)
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today);
+            thirtyDaysAgo.setDate(today.getDate() - 30);
+            
+            document.getElementById('startDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+        });
+    </script>
+</body>
+</html> 
