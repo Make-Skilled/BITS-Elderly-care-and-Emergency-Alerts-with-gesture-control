@@ -13,6 +13,8 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from io import BytesIO
 import time
+import pyttsx3
+from threading import Thread
 
 THINGSPEAK_CHANNEL_ID = "2571433"
 THINGSPEAK_READ_API_URL = f"https://api.thingspeak.com/channels/{THINGSPEAK_CHANNEL_ID}/feeds.json"
@@ -646,71 +648,120 @@ def fetch_thingspeak_data():
         print(f"Error fetching ThingSpeak data: {str(e)}")
     return None
 
+# Initialize text-to-speech engine
+def init_text_to_speech():
+    engine = pyttsx3.init()
+    engine.setProperty('rate', 150)    # Speaking rate
+    engine.setProperty('volume', 0.9)  # Volume (0-1)
+    return engine
+
+# Function to speak text in a separate thread
+def speak_async(text):
+    def speak_text():
+        engine = init_text_to_speech()
+        engine.say(text)
+        engine.runAndWait()
+    
+    Thread(target=speak_text).start()
+
 def analyze_thingspeak_data(sensor_data):
     recommendations = []
+    speak_messages = []
     
     if not sensor_data:
         return []
 
     # Flex sensor analysis (Help detection)
-    if sensor_data.get('flex1', 0) > 900:  # Threshold for help gesture
+    if sensor_data.get('flex1', 0) > 900:
+        message = "Emergency! Help gesture detected! Please check on the user immediately."
         recommendations.append({
-            'message': "Help gesture detected! Please check on the user immediately.",
+            'message': message,
             'severity': 'high',
             'type': 'emergency'
         })
+        speak_messages.append(message)
 
     # Water detection
-    if sensor_data.get('flex2', 0) > 900:  # Threshold for water detection
+    if sensor_data.get('flex2', 0) > 900:
+        message = "Emergency! Water detected! Check for potential spills or flooding."
         recommendations.append({
-            'message': "Water detected! Check for potential spills or flooding.",
+            'message': message,
             'severity': 'high',
             'type': 'emergency'
         })
+        speak_messages.append(message)
 
     # Temperature analysis
     temp = sensor_data.get('temperature')
     if temp:
         if temp > 37.8:
+            message = f"Warning! High temperature detected: {temp:.1f} degrees Celsius. Please rest and monitor. If persistent, consult a healthcare provider."
             recommendations.append({
-                'message': f"High temperature detected ({temp:.1f}°C). Please rest and monitor. If persistent, consult a healthcare provider.",
+                'message': message,
                 'severity': 'high',
                 'type': 'health'
             })
+            speak_messages.append(message)
         elif temp < 35.0:
+            message = f"Warning! Low temperature detected: {temp:.1f} degrees Celsius. Keep warm and monitor."
             recommendations.append({
-                'message': f"Low temperature detected ({temp:.1f}°C). Keep warm and monitor.",
+                'message': message,
                 'severity': 'high',
                 'type': 'health'
             })
+            speak_messages.append(message)
 
     # Heart rate analysis
     hr = sensor_data.get('heart_rate')
     if hr:
         if hr > 100:
+            message = f"Caution! Elevated heart rate: {hr} beats per minute. Take rest and practice deep breathing."
             recommendations.append({
-                'message': f"Elevated heart rate ({hr} BPM). Take rest and practice deep breathing.",
+                'message': message,
                 'severity': 'medium',
                 'type': 'health'
             })
+            speak_messages.append(message)
         elif hr < 60:
+            message = f"Caution! Low heart rate: {hr} beats per minute. If you feel dizzy, consult a healthcare provider."
             recommendations.append({
-                'message': f"Low heart rate ({hr} BPM). If you feel dizzy, consult a healthcare provider.",
+                'message': message,
                 'severity': 'medium',
                 'type': 'health'
             })
+            speak_messages.append(message)
 
     # SpO2 analysis
     spo2 = sensor_data.get('spo2')
     if spo2:
         if spo2 < 95:
+            message = f"Warning! Low oxygen saturation: {spo2} percent. Practice deep breathing exercises. If below 90 percent, seek medical attention."
             recommendations.append({
-                'message': f"Low oxygen saturation ({spo2}%). Practice deep breathing exercises. If below 90%, seek medical attention.",
+                'message': message,
                 'severity': 'high',
                 'type': 'health'
             })
+            speak_messages.append(message)
+
+    # Speak all messages
+    if speak_messages:
+        combined_message = " ... ".join(speak_messages)
+        speak_async(combined_message)
 
     return recommendations
+
+# Add a route to manually trigger speech for specific recommendations
+@app.route('/speak-recommendation/<int:rec_id>')
+@login_required
+def speak_recommendation(rec_id):
+    cursor.execute('SELECT recommendation FROM recommendations WHERE id = ? AND user_id = ?',
+                  (rec_id, current_user.id))
+    result = cursor.fetchone()
+    
+    if result:
+        speak_async(result[0])
+        return jsonify({'status': 'success'})
+    return jsonify({'status': 'error', 'message': 'Recommendation not found'})
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000) 

@@ -79,11 +79,11 @@
                                 <i class="fas fa-exclamation-triangle mr-2"></i>Emergency Alert Status
                             </h5>
                         </div>
-                        <div>
+                        <!-- <div>
                             <button class="btn btn-danger btn-lg" onclick="triggerEmergencyAlert()">
                                 <i class="fas fa-bell mr-2"></i>Trigger Emergency Alert
                             </button>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -257,12 +257,19 @@
                                 <div class="d-flex align-items-center">
                                     <i class="fas {% if rec.type == 'emergency' %}fa-exclamation-triangle{% 
                                                 else %}fa-heartbeat{% endif %} mr-2"></i>
-                                    <div>
+                                    <div class="flex-grow-1">
                                         {{ rec.message }}
                                         {% if rec.timestamp %}
                                         <small class="d-block opacity-75">{{ rec.timestamp }}</small>
                                         {% endif %}
                                     </div>
+                                    {% if rec.id %}
+                                    <button class="btn btn-sm btn-light ml-2 speak-btn" 
+                                            onclick="speakRecommendation({{ rec.id }})"
+                                            title="Speak this recommendation">
+                                        <i class="fas fa-volume-up"></i>
+                                    </button>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endfor %}

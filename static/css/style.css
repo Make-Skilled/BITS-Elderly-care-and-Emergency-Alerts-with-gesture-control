@@ -222,3 +222,17 @@ body {
 .opacity-75 {
     opacity: 0.75;
 }
+
+.speak-btn {
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.speak-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.recommendation-item:hover .speak-btn {
+    opacity: 1;
+}
