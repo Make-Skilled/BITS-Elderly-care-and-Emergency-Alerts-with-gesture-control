@@ -49,10 +49,15 @@ int flex2 = 33;
 int flex3 = 34;  // GPIO 34 is input-only
 int flex4 = 35;  // GPIO 35 is input-only
 
+#define IR_SENSOR 26
+#define BUZZER 27
+
 void setup() {
   Serial.begin(115200);
   pinMode(flex1, INPUT);
   pinMode(flex2, INPUT);
+  pinMode(IR_SENSOR, INPUT);
+  pinMode(BUZZER, OUTPUT);
 
   Serial.println("Initializing sensors...");
   WiFi.begin("Act", "Madhumakeskilled");
@@ -103,8 +108,19 @@ void sendToThingSpeak(int val1, int val2, int val3, int val4, float temperatureC
   }
 }
 
+void checkIRSensor() {
+  if (digitalRead(IR_SENSOR) == LOW) {
+    digitalWrite(BUZZER, HIGH);
+    Serial.println("Object not detected! Buzzer activated.");
+  } else {
+    digitalWrite(BUZZER, LOW);
+    Serial.println("Object detected! Buzzer deactivated.");
+  }
+}
+
 void loop() {
   Blynk.run();
+  checkIRSensor();
 
   int val1 = analogRead(flex1);
   int val2 = analogRead(flex2);
